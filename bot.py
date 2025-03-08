@@ -58,23 +58,43 @@ async def handle_new_members(event):
     if is_subscribed:
         subscribed_users[user.id] = event.chat.id
         if user.id in muted_users:
-            msg = f"`😊 Welcome back, {mention}! 🎉 You're now unmuted in {chat.title}! 🚀`"
+            msg = f"\n😊 Welcome back, {mention}! 🎉\n\nYou're now unmuted in {chat.title}! 🚀"
             await Cypherix.edit_permissions(event.chat.id, user.id, send_messages=True)
             muted_users.remove(user.id)
         else:
-            msg = f"`😂 Welcome to Cypherix, {mention}! 🎉 Hope you're not my ex, because I won't force you to stay! 🚀`"
+            msg = f"\n😎 Welcome to Cypherix, {mention}!\n\nI’m not your ex, I won’t ignore your texts! 🚀"
         buttons = [Button.url("Visit Channel", url=f"https://t.me/{channel}")]
     else:
-        username = f"@{user.username}" if user.username else mention
-        msg = f"`🚨 Hey {mention}, you must join @{channel} first!\n\nDon't be shy, it's free! 😜`"
+        msg = f"\n🚨 Hey {mention}, you must join @{channel} first!\n\nDon't be shy, it's free! 😜"
         buttons = [
-            [Button.url("🔥 Join Cypherix Now", url=f"https://t.me/{channel}")]
+            [Button.url("🔥 Join Cypherix Now", url=f"https://t.me/{channel}")],
+            [Button.inline("✅ Verify Subscription", data=f"unmute_{user.id}")]
         ]
         await Cypherix.edit_permissions(event.chat.id, user.id, send_messages=False)
 
     sent_msg = await event.reply(msg, buttons=buttons)
-    await asyncio.sleep(40)  # Auto-delete after 40 seconds
+    await asyncio.sleep(40)
     await sent_msg.delete()
+
+@Cypherix.on(events.callbackquery.CallbackQuery(data=re.compile(b"unmute_(.*)")))
+async def handle_unmute(event):
+    uid = int(event.data_match.group(1).decode("UTF-8"))
+    if uid != event.sender_id:
+        return await event.answer("This button is not for you!", cache_time=0, alert=True)
+
+    if await get_user_join(uid):
+        subscribed_users[uid] = event.chat_id
+        await Cypherix.edit_permissions(event.chat_id, uid, send_messages=True)
+        if uid in muted_users:
+            msg = f"\n😊 Welcome back, [{uid}](tg://user?id={uid})!\n\nYou're now unmuted in {event.chat.title}! 🚀"
+            muted_users.discard(uid)
+        else:
+            msg = f"\n🎉 Welcome to Cypherix, [{uid}](tg://user?id={uid})!\n\nEnjoy chatting! 🚀"
+        sent_msg = await event.edit(msg, buttons=[Button.url("Visit Channel", url=f"https://t.me/{channel}")])
+        await asyncio.sleep(10)
+        await sent_msg.delete()
+    else:
+        await event.answer(f"Please join @{channel} first!", cache_time=0, alert=True)
 
 @Cypherix.on(events.NewMessage(pattern="^/start$"))
 async def start(event):
@@ -82,7 +102,7 @@ async def start(event):
         "🔒 Access restricted! Join Cypherix to proceed.",
         buttons=[[Button.url("🔥 Join Cypherix Now", url=f"https://t.me/{channel}")]],
     )
-    await asyncio.sleep(10)  # Auto-delete after 10 seconds
+    await asyncio.sleep(10)
     await sent_msg.delete()
     await event.delete()
 
