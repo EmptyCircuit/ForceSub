@@ -128,4 +128,4 @@ async def check_unsubscribed():
 Cypherix.loop.create_task(check_unsubscribed())
 
 log.info(f"ForceSub Bot is now active as @{bot_self.username}. 🚀")
-Cypherix.run_until_disconnected() which port
+Cypherix.run_until_disconnected()
