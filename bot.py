@@ -94,7 +94,7 @@ async def handle_new_members(event):
         await Cypherix.edit_permissions(event.chat.id, user.id, send_messages=False)
 
     sent_msg = await event.reply(msg, buttons=buttons)
-    await asyncio.sleep(50)  # Auto-delete after 30 seconds
+    await asyncio.sleep(30)  # Auto-delete after 30 seconds
     await sent_msg.delete()
 
 @Cypherix.on(events.callbackquery.CallbackQuery(data=re.compile(b"unmute_(.*)")))
@@ -112,7 +112,7 @@ async def handle_unmute(event):
         🚀 ɴᴏᴡ, ᴇɴᴊᴏʏ ᴛʜᴇ ᴄʜᴀᴏꜱ!
         """
         sent_msg = await event.edit(msg, buttons=[Button.url("🔗 ᴠɪꜱɪᴛ ᴄʜᴀɴɴᴇʟ", url=f"https://t.me/{channel}")])
-        await asyncio.sleep(30)  # Auto-delete after 10 seconds
+        await asyncio.sleep(10)  # Auto-delete after 10 seconds
         await sent_msg.delete()
     else:
         await event.answer(f"⚠️ ʏᴏᴜ ʜᴀᴠᴇɴ'ᴛ ᴊᴏɪɴᴇᴅ @{channel} ʏᴇᴛ!", cache_time=0, alert=True)
